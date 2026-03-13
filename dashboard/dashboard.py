@@ -187,7 +187,7 @@ elif seccion == "🎯 Análisis por Plan":
     )
     
     # Mostrar imagen
-    ruta_imagen = os.path.join("assets", imagen_seleccionada[1])
+    ruta_imagen = os.path.join("dashboard/assets", imagen_seleccionada[1])
     if os.path.exists(ruta_imagen):
         image = Image.open(ruta_imagen)
         st.image(image, caption=imagen_seleccionada[0], use_container_width=True)
@@ -200,7 +200,7 @@ elif seccion == "🎯 Análisis por Plan":
     cols = st.columns(len(data["imagenes"]))
     for i, (desc, img) in enumerate(zip(data["descripcion"], data["imagenes"])):
         with cols[i]:
-            ruta_mini = os.path.join("assets", img)
+            ruta_mini = os.path.join("dashboard/assets", img)
             if os.path.exists(ruta_mini):
                 image = Image.open(ruta_mini)
                 st.image(image, caption=desc, use_container_width=True)
