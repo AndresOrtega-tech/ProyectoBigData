@@ -1,0 +1,266 @@
+=== PLAN 5: ANÁLISIS DE HIPÓTESIS SUEÑO ===
+Hipótesis: 'Dormir menos de X horas impacta negativamente el task_success'
+Correlación: por confirmar
+
+=== METODOLOGÍA ===
+• Dataset: 500 registros de productividad de desarrolladores
+• Variable independiente: sleep_hours (horas de sueño la noche anterior)
+• Variable dependiente: task_success (0=fallo, 1=éxito)
+• Análisis: Correlación de Pearson + rangos + déficit + interacción
+• Herramientas: PySpark para procesamiento, pandas/matplotlib para visualización
+
+=== DEFINICIÓN DE RANGOS DE SUEÑO ===
+• Rango INSUFICIENTE: < 5 horas (déficit severo, impacto significativo)
+• Rango BAJO: 5-6 horas (déficit leve, ligero impacto)
+• Rango ÓPTIMO: 6-8 horas (rango recomendado por expertos)
+• Rango ALTO: > 8 horas (sueño excesivo, posible impacto negativo)
+• Referencia: Recomendación NSF de 7-9 horas para adultos
+
+=== ESTADÍSTICAS DESCRIPTIVAS ===
+Correlación de Pearson: 0.187
+Interpretación de correlación:
+• 0.0-0.1: Correlación nula o insignificante
+• 0.1-0.3: Correlación débil
+• 0.3-0.5: Correlación moderada
+• 0.5-0.7: Correlación fuerte
+• 0.7-1.0: Correlación muy fuerte
+
+Análisis por grupo de éxito:
+
+Grupo FRACASO (task_success = 0):
+  • Promedio sueño: 6.6 h
+  • Mediana sueño: 6.6 h
+  • Desviación estándar: 1.7 h
+  • Mínimo: 3.0 h
+  • Máximo: 10.0 h
+  • Total registros: 197
+
+Grupo ÉXITO (task_success = 1):
+  • Promedio sueño: 7.2 h
+  • Mediana sueño: 7.1 h
+  • Desviación estándar: 1.2 h
+  • Mínimo: 4.1 h
+  • Máximo: 10.0 h
+  • Total registros: 303
+
+Diferencia clave:
+  • Los desarrolladores con éxito duermen 0.6 horas más en promedio
+  • Esto representa un 8.4% más de descanso
+
+=== ANÁLISIS POR RANGOS DE SUEÑO ===
+Tasa de éxito y características por rango:
+
+Rango ALTO:
+  • Tasa de éxito: 65.6% (0.656)
+  • Horas de coding promedio: 5.0 h
+  • Carga cognitiva promedio: 2.8
+  • Commits promedio: 4.5
+  • Total registros: 122
+  • Proporción del dataset: 24.4%
+  • Interpretación: Sueño excesivo que puede indicar otros problemas
+
+Rango OPTIMO:
+  • Tasa de éxito: 64.6% (0.646)
+  • Horas de coding promedio: 5.0 h
+  • Carga cognitiva promedio: 4.5
+  • Commits promedio: 4.6
+  • Total registros: 263
+  • Proporción del dataset: 52.6%
+  • Interpretación: Descanso adecuado para máximo rendimiento
+
+Rango BAJO:
+  • Tasa de éxito: 62.5% (0.625)
+  • Horas de coding promedio: 4.9 h
+  • Carga cognitiva promedio: 5.8
+  • Commits promedio: 4.2
+  • Total registros: 72
+  • Proporción del dataset: 14.4%
+  • Interpretación: Descanso mínimo con ligero impacto en rendimiento
+
+Rango INSUFICIENTE:
+  • Tasa de éxito: 18.6% (0.186)
+  • Horas de coding promedio: 5.5 h
+  • Carga cognitiva promedio: 7.4
+  • Commits promedio: 5.6
+  • Total registros: 43
+  • Proporción del dataset: 8.6%
+  • Interpretación: Descanso inadecuado que afecta rendimiento cognitivo
+
+=== ANÁLISIS POR DÉFICIT DE SUEÑO ===
+Impacto del déficit respecto a 8 horas recomendadas:
+
+Rango DEFICIT LEVE:
+  • Tasa de éxito: 68.8% (0.688)
+  • Sueño promedio: 7.5 h
+  • Carga cognitiva: 4.0
+  • Total registros: 128
+
+Rango SIN DEFICIT:
+  • Tasa de éxito: 65.6% (0.656)
+  • Sueño promedio: 8.8 h
+  • Carga cognitiva: 2.8
+  • Total registros: 122
+
+Rango DEFICIT MODERADO:
+  • Tasa de éxito: 60.7% (0.607)
+  • Sueño promedio: 6.5 h
+  • Carga cognitiva: 4.9
+  • Total registros: 135
+
+Rango DEFICIT SEVERO:
+  • Tasa de éxito: 46.1% (0.461)
+  • Sueño promedio: 5.0 h
+  • Carga cognitiva: 6.4
+  • Total registros: 115
+
+=== ANÁLISIS POR HORA EXACTA ===
+Patrones detallados por horas específicas:
+
+5.3 horas de sueño:
+  • Tasa de éxito: 50.0% (0.500)
+  • Frecuencia: 10.0 registros
+  • Interpretación: Déficit leve, rendimiento reducido
+
+5.6 horas de sueño:
+  • Tasa de éxito: 60.0% (0.600)
+  • Frecuencia: 10.0 registros
+  • Interpretación: Déficit leve, rendimiento reducido
+
+5.7 horas de sueño:
+  • Tasa de éxito: 75.0% (0.750)
+  • Frecuencia: 12.0 registros
+  • Interpretación: Déficit leve, rendimiento reducido
+
+6.1 horas de sueño:
+  • Tasa de éxito: 26.7% (0.267)
+  • Frecuencia: 15.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+6.2 horas de sueño:
+  • Tasa de éxito: 56.2% (0.562)
+  • Frecuencia: 16.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+6.3 horas de sueño:
+  • Tasa de éxito: 70.6% (0.706)
+  • Frecuencia: 17.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+6.4 horas de sueño:
+  • Tasa de éxito: 60.0% (0.600)
+  • Frecuencia: 10.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+6.5 horas de sueño:
+  • Tasa de éxito: 66.7% (0.667)
+  • Frecuencia: 12.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+6.6 horas de sueño:
+  • Tasa de éxito: 60.0% (0.600)
+  • Frecuencia: 15.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+6.7 horas de sueño:
+  • Tasa de éxito: 64.7% (0.647)
+  • Frecuencia: 17.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+6.9 horas de sueño:
+  • Tasa de éxito: 76.5% (0.765)
+  • Frecuencia: 17.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+7.1 horas de sueño:
+  • Tasa de éxito: 92.3% (0.923)
+  • Frecuencia: 13.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+7.3 horas de sueño:
+  • Tasa de éxito: 52.6% (0.526)
+  • Frecuencia: 19.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+7.4 horas de sueño:
+  • Tasa de éxito: 71.4% (0.714)
+  • Frecuencia: 14.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+7.5 horas de sueño:
+  • Tasa de éxito: 75.0% (0.750)
+  • Frecuencia: 16.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+7.6 horas de sueño:
+  • Tasa de éxito: 54.5% (0.545)
+  • Frecuencia: 11.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+7.7 horas de sueño:
+  • Tasa de éxito: 64.7% (0.647)
+  • Frecuencia: 17.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+7.8 horas de sueño:
+  • Tasa de éxito: 72.7% (0.727)
+  • Frecuencia: 11.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+7.9 horas de sueño:
+  • Tasa de éxito: 50.0% (0.500)
+  • Frecuencia: 14.0 registros
+  • Interpretación: Rango óptimo, máximo rendimiento
+
+8.3 horas de sueño:
+  • Tasa de éxito: 61.5% (0.615)
+  • Frecuencia: 13.0 registros
+  • Interpretación: Sueño excesivo, posible fatiga
+
+8.8 horas de sueño:
+  • Tasa de éxito: 81.8% (0.818)
+  • Frecuencia: 11.0 registros
+  • Interpretación: Sueño excesivo, posible fatiga
+
+=== INSIGHTS CLAVE ===
+1. RELACIÓN SUEÑO-ÉXITO:
+   • Correlación débil (0.187) indica relación positiva limitada
+2. PUNTO DE CORTE ÓPTIMO:
+   • Horas óptimas: 7.1 horas
+   • Tasa de éxito máxima: 92.3%
+3. IMPACTO DEL DÉFICIT:
+   • Déficit de sueño reduce éxito (r=-0.228)
+4. EXCESO DE SUEÑO:
+   • No hay evidencia de que dormir demasiado sea perjudicial
+
+=== COMPARACIÓN DE IMPORTANCIA ===
+Impacto relativo en task_success:
+• Cafeína vs Éxito: ~0.70 (muy fuerte positivo)
+• Horas vs Éxito: ~0.62 (fuerte positivo)
+• Carga Cognitiva vs Éxito: ~-0.20 (débil negativo)
+• Bugs vs Éxito: ~-0.18 (muy débil negativo)
+• Sueño vs Éxito: 0.187 (débil a moderado)
+
+Conclusión: El sueño tiene un impacto moderado en el éxito
+
+=== VEREDICTO FINAL ===
+✅ HIPÓTESIS CONFIRMADA (débil)
+Evidencia moderada que apoya la hipótesis original
+
+Métricas clave:
+• Correlación observada: 0.187
+• Correlación con déficit: -0.228
+• Horas óptimas: 7.1 h
+
+=== RECOMENDACIONES PRÁCTICAS ===
+• Dormir 7.1 horas para maximizar éxito
+• Este rango coincide con recomendaciones científicas (6-8 horas)
+• Evitar déficit de sueño (>2 horas menos que 8 horas recomendadas)
+• Priorizar descanso para tareas críticas
+
+=== LIMITACIONES DEL ANÁLISIS ===
+• Horas de sueño son auto-reportadas, pueden no ser precisas
+• Correlación no implica causalidad: otros factores pueden influir
+• Dataset limitado a 500 registros, puede no capturar toda la variabilidad
+• No se controla por calidad del sueño (profundidad, interrupciones)
+• Factores individuales (cronotipo, edad, salud) no están incluidos
+• Relación puede variar según tipo de tareas y presión temporal

@@ -1,0 +1,120 @@
+=== PLAN 2: ANÁLISIS DE HIPÓTESIS HORAS DE CÓDIGO ===
+Hipótesis: 'Más horas codificando aumenta la probabilidad de éxito'
+Correlación esperada: +0.62
+
+=== METODOLOGÍA ===
+• Dataset: 500 registros de productividad de desarrolladores
+• Variable independiente: hours_coding (horas de programación por sesión)
+• Variable dependiente: task_success (0=fallo, 1=éxito)
+• Análisis: Correlación de Pearson + agrupación por rangos + análisis de productividad
+• Herramientas: PySpark para procesamiento, pandas/matplotlib para visualización
+
+=== DEFINICIÓN DE RANGOS DE HORAS ===
+• Rango POCAS: < 3 horas (equivalente a medio día laboral)
+• Rango MODERADAS: 3-6 horas (equivalente a 3/4 día laboral)
+• Rango MUCHAS: 6-9 horas (equivalente a día laboral completo)
+• Rango EXCESIVAS: > 9 horas (equivalente a más de un día laboral)
+• Referencia: Jornada laboral estándar de 8 horas
+
+=== ESTADÍSTICAS DESCRIPTIVAS ===
+Correlación de Pearson: 0.616
+Interpretación de correlación:
+• 0.0-0.3: Correlación débil
+• 0.3-0.5: Correlación moderada
+• 0.5-0.7: Correlación fuerte
+• 0.7-1.0: Correlación muy fuerte
+
+Análisis por grupo de éxito:
+
+Grupo FRACASO (task_success = 0):
+  • Promedio horas: 3.5 h
+  • Mediana horas: 3.3 h
+  • Desviación estándar: 1.8 h
+  • Mínimo: 0.0 h
+  • Máximo: 12.0 h
+  • Promedio commits: 3.5
+  • Total registros: 197
+
+Grupo ÉXITO (task_success = 1):
+  • Promedio horas: 6.0 h
+  • Mediana horas: 5.7 h
+  • Desviación estándar: 1.4 h
+  • Mínimo: 4.0 h
+  • Máximo: 11.2 h
+  • Promedio commits: 5.3
+  • Total registros: 303
+
+Diferencia clave:
+  • Los desarrolladores con éxito trabajan 2.5 horas más en promedio
+  • Esto representa un 69.4% más de tiempo de código
+
+=== ANÁLISIS POR RANGOS DE HORAS ===
+Tasa de éxito y productividad por rango:
+
+Rango POCAS:
+  • Tasa de éxito: 0.0% (0.000)
+  • Horas promedio: 2.1 h
+  • Commits promedio: 1.9
+  • Productividad: 0.89 commits/hora
+  • Total registros: 76
+  • Proporción del dataset: 15.2%
+  • Interpretación: Tiempo insuficiente para completar tareas complejas
+
+Rango MODERADAS:
+  • Tasa de éxito: 63.8% (0.638)
+  • Horas promedio: 4.6 h
+  • Commits promedio: 4.2
+  • Productividad: 0.94 commits/hora
+  • Total registros: 271
+  • Proporción del dataset: 54.2%
+  • Interpretación: Tiempo adecuado para tareas moderadamente complejas
+
+Rango MUCHAS:
+  • Tasa de éxito: 85.7% (0.857)
+  • Horas promedio: 7.0 h
+  • Commits promedio: 6.3
+  • Productividad: 0.90 commits/hora
+  • Total registros: 140
+  • Proporción del dataset: 28.0%
+  • Interpretación: Tiempo suficiente para tareas complejas
+
+Rango EXCESIVAS:
+  • Tasa de éxito: 76.9% (0.769)
+  • Horas promedio: 9.8 h
+  • Commits promedio: 9.8
+  • Productividad: 1.01 commits/hora
+  • Total registros: 13
+  • Proporción del dataset: 2.6%
+  • Interpretación: Posible fatiga o sobreesfuerzo afectando rendimiento
+
+=== INSIGHTS CLAVE ===
+1. RELACIÓN HORAS-ÉXITO:
+   • Correlación fuerte (0.616) indica relación positiva clara
+2. RENDIMIENTOS DECRECIENTES:
+   • Rango óptimo: muchas con 85.7% éxito
+   • Evidencia de rendimientos decrecientes en rango excesivo
+3. PRODUCTIVIDAD:
+   • Máxima productividad: excesivas (1.01 commits/hora)
+4. UMPRAL MÍNIMO:
+   • Rango 'pocas' muestra baja tasa de éxito (0.0%)
+   • Sugiere umbral mínimo de horas necesario para éxito
+
+=== VEREDICTO FINAL ===
+✅ HIPÓTESIS CONFIRMADA
+Evidencia fuerte que apoya la hipótesis original
+
+Métricas clave:
+• Correlación observada: 0.616 (esperada: +0.62)
+• Precisión: 0.004 de diferencia con esperada
+• Rango óptimo: muchas (85.7% éxito)
+
+=== RECOMENDACIONES PRÁCTICAS ===
+• Asignar suficiente tiempo para tareas críticas (rango óptimo identificado)
+• Planificar jornadas completas para tareas complejas
+
+=== LIMITACIONES DEL ANÁLISIS ===
+• Correlación no implica causalidad: otros factores pueden influir
+• Dataset limitado a 500 registros, puede no representar todas las situaciones
+• No se controla por dificultad de tareas o experiencia del desarrollador
+• Factores externos (interrupciones, herramientas) no están incluidos
+• La productividad medida en commits puede no reflejar calidad del código

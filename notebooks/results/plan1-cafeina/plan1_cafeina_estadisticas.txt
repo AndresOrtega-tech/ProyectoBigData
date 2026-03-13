@@ -1,0 +1,110 @@
+=== PLAN 1: ANÁLISIS DE HIPÓTESIS CAFEÍNA ===
+Hipótesis: 'Mayor consumo de cafeína está asociado con mayor task_success'
+Correlación esperada: +0.70
+
+=== METODOLOGÍA ===
+• Dataset: 500 registros de productividad de desarrolladores
+• Variable independiente: coffee_intake_mg (mg de cafeína consumidos)
+• Variable dependiente: task_success (0=fallo, 1=éxito)
+• Análisis: Correlación de Pearson + agrupación por rangos
+• Herramientas: PySpark para procesamiento, pandas/matplotlib para visualización
+
+=== DEFINICIÓN DE RANGOS DE CAFEÍNA ===
+• Rango BAJO: < 200 mg (equivalente a ~2 tazas de café)
+• Rango MEDIO: 200-400 mg (equivalente a 2-4 tazas de café)
+• Rango ALTO: > 400 mg (equivalente a >4 tazas de café)
+• Referencia: Una taza de café (~8oz) contiene ~95mg de cafeína
+
+=== ESTADÍSTICAS DESCRIPTIVAS ===
+Correlación de Pearson: 0.695
+Interpretación de correlación:
+• 0.0-0.3: Correlación débil
+• 0.3-0.5: Correlación moderada
+• 0.5-0.7: Correlación fuerte
+• 0.7-1.0: Correlación muy fuerte
+
+Análisis por grupo de éxito:
+
+Grupo FRACASO (task_success = 0):
+  • Promedio cafeína: 340.6 mg
+  • Mediana cafeína: 332.0 mg
+  • Desviación estándar: 140.5 mg
+  • Mínimo: 6 mg
+  • Máximo: 600 mg
+  • Total registros: 197
+
+Grupo ÉXITO (task_success = 1):
+  • Promedio cafeína: 542.9 mg
+  • Mediana cafeína: 570.0 mg
+  • Desviación estándar: 67.0 mg
+  • Mínimo: 318 mg
+  • Máximo: 600 mg
+  • Total registros: 303
+
+Diferencia clave:
+  • Los desarrolladores con éxito consumen 202.3 mg más de cafeína en promedio
+  • Esto representa un 59.4% más de cafeína
+
+=== ANÁLISIS POR RANGOS DE CAFEÍNA ===
+Tasa de éxito y distribución por rango:
+
+Rango ALTO:
+  • Tasa de éxito: 83.6% (0.836)
+  • Total registros: 348
+  • Proporción del dataset: 69.6%
+  • Interpretación: Consumo óptimo para máximo rendimiento
+
+Rango MEDIO:
+  • Tasa de éxito: 9.8% (0.098)
+  • Total registros: 122
+  • Proporción del dataset: 24.4%
+  • Interpretación: Consumo moderado con bajo rendimiento
+
+Rango BAJO:
+  • Tasa de éxito: 0.0% (0.000)
+  • Total registros: 30
+  • Proporción del dataset: 6.0%
+  • Interpretación: Consumo insuficiente para rendimiento óptimo
+
+=== INSIGHTS CLAVE ===
+1. UMBRAL MÍNIMO CRÍTICO:
+   • Ningún desarrollador con <200mg de cafeína tuvo éxito (0%)
+   • Sugiere un umbral mínimo necesario para rendimiento
+
+2. RELACIÓN DOSE-RESPUESTA:
+   • Relación clara: más cafeína = mayor probabilidad de éxito
+   • Rango alto (83.6%) > Medio (9.8%) > Bajo (0%)
+
+3. CONSISTENCIA EN GRUPO EXITOSO:
+   • Desviación estándar menor (67mg vs 140mg)
+   • Indica consumo más consistente entre desarrolladores exitosos
+
+4. IMPACTO PRÁCTICO:
+   • Consumir >400mg aumenta 8.5x la probabilidad de éxito vs 200-400mg
+   • Consumir <200mg garantiza fracaso en este dataset
+
+=== VEREDICTO FINAL ===
+✅ HIPÓTESIS CONFIRMADA
+Evidencia fuerte que apoya la hipótesis original
+
+Métricas clave:
+• Correlación observada: 0.695
+• Correlación esperada: +0.70
+• Precisión de la predicción: 0.7% de desviación
+• Nivel de confianza: Alto (correlación > 0.5)
+
+=== RECOMENDACIONES PRÁCTICAS ===
+Basado en los análisis:
+1. Consumir mínimo 200mg de cafeína para tener oportunidad de éxito
+2. Ideal consumir >400mg para máxima probabilidad de éxito (83.6%)
+3. Evitar consumo <200mg (riesgo 100% de fracaso en este dataset)
+4. Mantener consumo consistente (menor variabilidad en grupo exitoso)
+
+=== LIMITACIONES DEL ANÁLISIS ===
+• Correlación no implica causalidad
+• Dataset limitado a 500 registros
+• No se controlan otras variables (horas de sueño, experiencia, etc.)
+• Efectos individuales de cafeína pueden variar significativamente
+• No se considera tolerancia o efectos negativos del exceso
+
+Análisis completado: 2026-03-11 20:45:03

@@ -1,0 +1,180 @@
+=== PLAN 4: ANÁLISIS DE HIPÓTESIS BUGS REPORTADOS ===
+Hipótesis: 'Más bugs reportados indica menor probabilidad de éxito'
+Correlación esperada: -0.18 (muy débil negativa)
+
+=== METODOLOGÍA ===
+• Dataset: 500 registros de productividad de desarrolladores
+• Variable independiente: bugs_reported (número de bugs detectados)
+• Variable dependiente: task_success (0=fallo, 1=éxito)
+• Análisis: Correlación de Pearson + distribución + categorías
+• Herramientas: PySpark para procesamiento, pandas/matplotlib para visualización
+
+=== DEFINICIÓN DE CATEGORÍAS DE BUGS ===
+• Cero bugs: 0 bugs detectados (código limpio, sin problemas evidentes)
+• Un bug: 1 bug detectado (error menor, fácil de corregir)
+• Dos bugs: 2 bugs detectados (problemas moderados, requiere atención)
+• Tres o más: 3+ bugs detectados (múltiples problemas, posible refactorización)
+• Referencia: Número absoluto de bugs reportados durante la sesión
+
+=== ESTADÍSTICAS DESCRIPTIVAS ===
+Correlación de Pearson: -0.178
+Interpretación de correlación:
+• -0.1 a -0.3: Correlación negativa muy débil
+• -0.3 a -0.5: Correlación negativa débil
+• 0.0 a ±0.1: Sin correlación prácticamente nula
+• +0.1 a +0.3: Correlación positiva muy débil
+
+Distribución de bugs reportados:
+• Mediana: 0 bugs
+• Promedio: 0.86 bugs
+• Q1 (25%): 0 bugs
+• Q3 (75%): 2 bugs
+• Registros con 0 bugs: 261 (52.2%)
+
+Análisis por grupo de éxito:
+
+Grupo FRACASO (task_success = 0):
+  • Promedio bugs: 1.10
+  • Mediana bugs: 1.0
+  • Desviación estándar: 1.28
+  • Mínimo: 0
+  • Máximo: 5
+  • Total registros: 197
+
+Grupo ÉXITO (task_success = 1):
+  • Promedio bugs: 0.70
+  • Mediana bugs: 0.0
+  • Desviación estándar: 0.94
+  • Mínimo: 0
+  • Máximo: 3
+  • Total registros: 303
+
+=== ANÁLISIS POR NÚMERO EXACTO DE BUGS ===
+Tasa de éxito y características por número de bugs:
+
+0 bugs:
+  • Tasa de éxito: 66.7% (0.667)
+  • Frecuencia: 261.0 registros
+  • Commits promedio: 4.6
+  • Horas promedio: 5.0 h
+  • Interpretación: Código sin problemas detectados
+
+1 bugs:
+  • Tasa de éxito: 58.0% (0.580)
+  • Frecuencia: 112.0 registros
+  • Commits promedio: 4.4
+  • Horas promedio: 4.9 h
+  • Interpretación: Error menor, impacto limitado
+
+2 bugs:
+  • Tasa de éxito: 56.2% (0.562)
+  • Frecuencia: 80.0 registros
+  • Commits promedio: 4.9
+  • Horas promedio: 5.2 h
+  • Interpretación: Problemas moderados que afectan rendimiento
+
+3 bugs:
+  • Tasa de éxito: 54.3% (0.543)
+  • Frecuencia: 35.0 registros
+  • Commits promedio: 4.1
+  • Horas promedio: 5.2 h
+  • Interpretación: Múltiples problemas, posible refactorización necesaria
+
+4 bugs:
+  • Tasa de éxito: 0.0% (0.000)
+  • Frecuencia: 8.0 registros
+  • Commits promedio: 4.9
+  • Horas promedio: 5.0 h
+  • Interpretación: Múltiples problemas, posible refactorización necesaria
+
+5 bugs:
+  • Tasa de éxito: 0.0% (0.000)
+  • Frecuencia: 4.0 registros
+  • Commits promedio: 8.0
+  • Horas promedio: 6.7 h
+  • Interpretación: Múltiples problemas, posible refactorización necesaria
+
+=== ANÁLISIS POR CATEGORÍAS ===
+Comportamiento y patrones por categoría de bugs:
+
+Categoría CERO BUGS:
+  • Tasa de éxito: 66.7% (0.667)
+  • Commits promedio: 4.6
+  • Horas promedio: 5.0 h
+  • Cafeína promedio: 460 mg
+  • Total registros: 261
+  • Proporción del dataset: 52.2%
+
+Categoría UN BUG:
+  • Tasa de éxito: 58.0% (0.580)
+  • Commits promedio: 4.4
+  • Horas promedio: 4.9 h
+  • Cafeína promedio: 457 mg
+  • Total registros: 112
+  • Proporción del dataset: 22.4%
+
+Categoría DOS BUGS:
+  • Tasa de éxito: 56.2% (0.562)
+  • Commits promedio: 4.9
+  • Horas promedio: 5.2 h
+  • Cafeína promedio: 470 mg
+  • Total registros: 80
+  • Proporción del dataset: 16.0%
+
+Categoría TRES O MAS:
+  • Tasa de éxito: 40.4% (0.404)
+  • Commits promedio: 4.6
+  • Horas promedio: 5.3 h
+  • Cafeína promedio: 483 mg
+  • Total registros: 47
+  • Proporción del dataset: 9.4%
+
+=== PRODUCTIVIDAD CON BUGS ===
+Análisis limitado a registros con bugs > 0 (239 registros):
+• Commits por bug (promedio): 3.14
+• Tasa de éxito con bugs: 54.0%
+
+=== INSIGHTS CLAVE ===
+1. DISTRIBUCIÓN ESPECIAL:
+   • Mediana = 0 bugs, mayoría sin problemas detectados
+   • 52.2% de las sesiones no reportan bugs
+   • Podría indicar tareas simples, falta de detección, o alta calidad
+2. CORRELACIÓN DÉBIL:
+   • Correlación negativa débil (-0.178)
+   • Más bugs se asocian ligeramente con menor éxito
+3. CALIDAD VS CANTIDAD:
+   • Sin relación clara entre commits y bugs (r=0.026)
+4. UMPRAL DE TOLERANCIA:
+   • Hasta 3 bugs aún permiten >50% de éxito
+   • Sugiere umbral de tolerancia para problemas menores
+
+=== COMPARACIÓN DE IMPORTANCIA ===
+Impacto relativo en task_success:
+• Cafeína vs Éxito: ~0.70 (muy fuerte positivo)
+• Horas vs Éxito: ~0.62 (fuerte positivo)
+• Carga Cognitiva vs Éxito: ~-0.20 (débil negativo)
+• Bugs vs Éxito: -0.178 (muy débil)
+
+Conclusión: Los bugs tienen el menor impacto directo en el éxito
+
+=== VEREDICTO FINAL ===
+✅ HIPÓTESIS CONFIRMADA (muy débil)
+Evidencia muy débil que apoya la hipótesis original
+
+Métricas clave:
+• Correlación observada: -0.178 (esperada: -0.18)
+• Diferencia con esperada: 0.002
+• Registros sin bugs: 52.2%
+
+=== RECOMENDACIONES PRÁCTICAS ===
+• Monitorear número de bugs como indicador de riesgo
+• Implementar code review para reducir bugs críticos
+• Considerar refactorización cuando bugs > umbral identificado
+
+=== LIMITACIONES DEL ANÁLISIS ===
+• El conteo de bugs depende de la habilidad de detección del desarrollador
+• No todos los bugs tienen la misma criticidad (mayor-menor)
+• Correlación no implica causalidad: factores no medidos pueden influir
+• Dataset limitado a 500 registros, puede no capturar patrones raros
+• No se controla por complejidad inherente de las tareas
+• Factores externos (herramientas de testing, pair programming) no están incluidos

@@ -1,0 +1,117 @@
+=== PLAN 3: ANÁLISIS DE HIPÓTESIS CARGA COGNITIVA ===
+Hipótesis: 'Alta carga cognitiva reduce el task_success'
+Correlación esperada: -0.20 (débil negativa)
+
+=== METODOLOGÍA ===
+• Dataset: 500 registros de productividad de desarrolladores
+• Variable independiente: cognitive_load (escala 1-10 auto-reportada)
+• Variable dependiente: task_success (0=fallo, 1=éxito)
+• Análisis: Correlación de Pearson + rangos + interacción con horas
+• Herramientas: PySpark para procesamiento, pandas/matplotlib para visualización
+
+=== DEFINICIÓN DE RANGOS DE CARGA COGNITIVA ===
+• Rango BAJA: 1-3 (equivalente a tareas simples, baja presión)
+• Rango MEDIA: 4-6 (equivalente a tareas moderadamente complejas)
+• Rango ALTA: 7-10 (equivalente a tareas complejas, alta presión)
+• Referencia: Escala subjetiva de percepción de dificultad mental
+
+=== ESTADÍSTICAS DESCRIPTIVAS ===
+Correlación de Pearson: -0.200
+Interpretación de correlación:
+• -0.1 a -0.3: Correlación negativa débil
+• -0.3 a -0.5: Correlación negativa moderada
+• 0.0 a ±0.1: Sin correlación
+• +0.1 a +0.3: Correlación positiva débil
+
+Análisis por grupo de éxito:
+
+Grupo FRACASO (task_success = 0):
+  • Promedio carga cognitiva: 5.0
+  • Mediana carga cognitiva: 4.7
+  • Desviación estándar: 2.2
+  • Mínimo: 1.0
+  • Máximo: 10.0
+  • Total registros: 197
+
+Grupo ÉXITO (task_success = 1):
+  • Promedio carga cognitiva: 4.2
+  • Mediana carga cognitiva: 4.4
+  • Desviación estándar: 1.6
+  • Mínimo: 1.0
+  • Máximo: 6.9
+  • Total registros: 303
+
+Diferencia clave:
+  • Los desarrolladores con fracaso reportan 0.8 puntos más de carga
+  • Diferencia porcentual: 18.2%
+
+=== ANÁLISIS POR RANGOS DE CARGA ===
+Tasa de éxito y factores asociados por rango:
+
+Rango ALTA:
+  • Tasa de éxito: 50.3% (0.503)
+  • Carga promedio: 5.1 h de código
+  • Distracciones promedio: 3.4
+  • Uso de IA promedio: 1.6 h
+  • Total registros: 187
+  • Proporción del dataset: 37.4%
+  • Interpretación: Tareas complejas con mayor riesgo de fracaso
+
+Rango BAJA:
+  • Tasa de éxito: 64.1% (0.641)
+  • Carga promedio: 4.8 h de código
+  • Distracciones promedio: 2.2
+  • Uso de IA promedio: 1.3 h
+  • Total registros: 117
+  • Proporción del dataset: 23.4%
+  • Interpretación: Tareas simples con alta probabilidad de éxito
+
+Rango MEDIA:
+  • Tasa de éxito: 68.4% (0.684)
+  • Carga promedio: 5.1 h de código
+  • Distracciones promedio: 3.0
+  • Uso de IA promedio: 1.6 h
+  • Total registros: 196
+  • Proporción del dataset: 39.2%
+  • Interpretación: Tareas moderadamente complejas con éxito variable
+
+=== INSIGHTS CLAVE ===
+1. RELACIÓN CARGA-ÉXITO:
+   • Correlación negativa (-0.200) confirma hipótesis parcialmente
+2. FACTORES INFLUYENTES:
+   • Sueño reduce la carga cognitiva (r=-0.734)
+   • Distracciones aumenta la carga cognitiva (r=0.400)
+   • Uso de IA aumenta la carga cognitiva (r=0.120)
+3. INTERACCIONES CRÍTICAS:
+   • Peores combinaciones (baja tasa de éxito):
+     Carga alta + Horas pocas: 0.0%
+     Carga baja + Horas pocas: 0.0%
+     Carga media + Horas pocas: 0.0%
+4. UMBRAL CRÍTICO:
+
+=== COMPARACIÓN DE IMPORTANCIA ===
+• Cafeína vs Éxito: ~0.70 (muy fuerte positivo)
+• Horas vs Éxito: ~0.62 (fuerte positivo)
+• Carga Cognitiva vs Éxito: -0.200 (débil)
+
+Conclusión: La carga cognitiva tiene menor impacto que cafeína y horas
+
+=== VEREDICTO FINAL ===
+✅ HIPÓTESIS CONFIRMADA (débil)
+Evidencia débil que apoya la hipótesis original
+
+Métricas clave:
+• Correlación observada: -0.200 (esperada: -0.20)
+• Diferencia con esperada: 0.000
+
+=== RECOMENDACIONES PRÁCTICAS ===
+• Monitorear niveles de carga cognitiva en tareas críticas
+• Proporcionar descansos o apoyo cuando carga sea alta
+• Considerar división de tareas complejas en sub-tareas más simples
+
+=== LIMITACIONES DEL ANÁLISIS ===
+• Carga cognitiva es medida subjetiva, puede variar entre desarrolladores
+• Correlación no implica causalidad: factores no medidos pueden influir
+• Dataset limitado a 500 registros, puede no capturar toda la variabilidad
+• No se controla por experiencia o habilidad del desarrollador
+• Factores externos (presión temporal, apoyo del equipo) no están incluidos
