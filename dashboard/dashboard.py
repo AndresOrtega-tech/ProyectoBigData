@@ -299,7 +299,7 @@ elif seccion == "🔍 Dataset Explorer":
     
     # Cargar dataset
     try:
-        df = pd.read_csv("data/ai_dev_productivity.csv")
+        df = pd.read_csv("dashboard/data/ai_dev_productivity.csv")
         st.success("✅ Dataset cargado exitosamente")
         
         # Estadísticas básicas
