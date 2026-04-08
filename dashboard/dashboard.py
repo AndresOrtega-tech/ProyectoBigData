@@ -1,7 +1,6 @@
 import json as json_lib
 import os
 
-import joblib
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -412,12 +411,14 @@ seccion = st.sidebar.selectbox(
 def cargar_pipeline():
     """Carga el pipeline sklearn (scaler + RandomForest) desde disco."""
     try:
+        import joblib  # importar aquí para evitar crash si no está instalado en cloud
+
         pipe = joblib.load("dashboard/model/pipeline.pkl")
         features = joblib.load("dashboard/model/feature_names.pkl")
         with open("dashboard/model/model_metadata.json") as f:
             meta = json_lib.load(f)
         return pipe, features, meta
-    except FileNotFoundError:
+    except (FileNotFoundError, ModuleNotFoundError, Exception):
         return None, None, None
 
 
