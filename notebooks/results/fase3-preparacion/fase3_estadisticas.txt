@@ -1,0 +1,144 @@
+============================================================
+=== FASE III: PREPARACIÓN DE DATOS ===
+============================================================
+Proyecto: Productividad de Desarrolladores con IA
+Dataset:  ai_dev_productivity.csv
+Registros originales: 500
+Registros post-limpieza: 500
+
+============================================================
+=== ANÁLISIS DE CALIDAD DE DATOS ===
+============================================================
+
+>> Valores nulos por columna:
+   hours_coding          :    0 nulos (  0.0%)  → OK
+   coffee_intake_mg      :    0 nulos (  0.0%)  → OK
+   distractions          :    0 nulos (  0.0%)  → OK
+   sleep_hours           :    0 nulos (  0.0%)  → OK
+   commits               :    0 nulos (  0.0%)  → OK
+   bugs_reported         :    0 nulos (  0.0%)  → OK
+   ai_usage_hours        :    0 nulos (  0.0%)  → OK
+   cognitive_load        :    0 nulos (  0.0%)  → OK
+   task_success          :    0 nulos (  0.0%)  → OK
+
+>> Filas eliminadas por nulos:           0
+>> Filas eliminadas por outliers críticos:0
+>> Filas eliminadas por inconsistencias:  0
+
+>> Outliers detectados por IQR (1.5×IQR):
+   hours_coding          :   3 outliers [fence: -0.41, 10.29]
+   coffee_intake_mg      :   1 outliers [fence: 23.75, 945.75]
+   distractions          :   1 outliers [fence: -1.00, 7.00]
+   sleep_hours           :   5 outliers [fence: 3.40, 10.60]
+   commits               :  10 outliers [fence: -1.50, 10.50]
+   bugs_reported         :   0 outliers [fence: -3.00, 5.00]
+   ai_usage_hours        :  14 outliers [fence: -1.36, 4.13]
+   cognitive_load        :   1 outliers [fence: -0.76, 9.74]
+
+   Nota: outliers IQR que NO son inconsistencias lógicas se mantienen
+         (pueden representar casos extremos legítimos).
+
+============================================================
+=== FEATURE ENGINEERING ===
+============================================================
+
+   sleep_deficit          = 8.0 - sleep_hours
+                           → Cuantifica privación de sueño respecto a las 8h recomendadas
+
+   productivity_ratio     = commits / hours_coding
+                           → Eficiencia por hora de código; evita sesgo por duración de sesión
+
+   caffeine_per_hour      = coffee_intake_mg / hours_coding
+                           → Intensidad de consumo relativa al tiempo activo
+
+   work_intensity         = hours_coding × cognitive_load
+                           → Proxy de fatiga cognitiva acumulada en la sesión
+
+   coffee_category        = pd.cut([bajo, medio, alto])
+                           → Segmentación ordinal: 0=<200mg, 1=200-400mg, 2=>400mg
+
+   sleep_category         = pd.cut([insuf., óptimo, excesivo])
+                           → Segmentación ordinal: 0=<6h, 1=6-8h, 2=>8h
+
+============================================================
+=== ESTADÍSTICAS DESCRIPTIVAS PRE-PROCESAMIENTO ===
+============================================================
+
+       hours_coding  coffee_intake_mg  distractions  sleep_hours  commits  bugs_reported  ai_usage_hours  cognitive_load  task_success
+count      500.0000           500.000      500.0000     500.0000  500.000       500.0000        500.0000        500.0000      500.0000
+mean         5.0156           463.192        2.9760       6.9758    4.608         0.8580          1.5109          4.4982        0.6060
+std          1.9473           142.335        1.6784       1.4560    2.705         1.1028          1.0856          1.8689        0.4891
+min          0.0000             6.000        0.0000       3.0000    0.000         0.0000          0.0000          1.0000        0.0000
+25%          3.6000           369.500        2.0000       6.1000    3.000         0.0000          0.6975          3.1750        0.0000
+50%          5.0300           500.500        3.0000       6.9500    5.000         0.0000          1.2600          4.4000        1.0000
+75%          6.2750           600.000        4.0000       7.9000    6.000         2.0000          2.0700          5.8000        1.0000
+max         12.0000           600.000        8.0000      10.0000   13.000         5.0000          6.3600         10.0000        1.0000
+
+============================================================
+=== ESTADÍSTICAS DESCRIPTIVAS POST-PROCESAMIENTO ===
+============================================================
+
+       hours_coding  coffee_intake_mg  distractions  sleep_hours  commits  bugs_reported  ai_usage_hours  cognitive_load  sleep_deficit  productivity_ratio  caffeine_per_hour  work_intensity  coffee_category  sleep_category  task_success
+count      500.0000           500.000      500.0000     500.0000  500.000       500.0000        500.0000        500.0000       500.0000            500.0000           500.0000        500.0000         500.0000        500.0000      500.0000
+mean         5.0156           463.192        2.9760       6.9758    4.608         0.8580          1.5109          4.4982         1.0242              0.9218            98.4547         22.7461           1.6340          0.9780        0.6060
+std          1.9473           142.335        1.6784       1.4560    2.705         1.1028          1.0856          1.8689         1.4560              0.5168            57.3495         13.9404           0.5973          0.6888        0.4891
+min          0.0000             6.000        0.0000       3.0000    0.000         0.0000          0.0000          1.0000        -2.0000              0.0000            15.0000          0.0000           0.0000          0.0000        0.0000
+25%          3.6000           369.500        2.0000       6.1000    3.000         0.0000          0.6975          3.1750         0.1000              0.6031            86.8024         12.2040           1.0000          1.0000        0.0000
+50%          5.0300           500.500        3.0000       6.9500    5.000         0.0000          1.2600          4.4000         1.0500              0.9091            95.7702         20.6420           2.0000          1.0000        1.0000
+75%          6.2750           600.000        4.0000       7.9000    6.000         2.0000          2.0700          5.8000         1.9000              1.2289           104.1736         30.4060           2.0000          1.0000        1.0000
+max         12.0000           600.000        8.0000      10.0000   13.000         5.0000          6.3600         10.0000         5.0000              3.6364          1280.0000        104.4000           2.0000          2.0000        1.0000
+
+============================================================
+=== BALANCE DE CLASES ===
+============================================================
+
+>> Distribución original (dataset completo post-limpieza):
+   Clase 0:   197 registros (39.4%)
+   Clase 1:   303 registros (60.6%)
+
+>> SMOTE aplicado: Sí
+>> Distribución post-SMOTE (solo training):
+   Clase 0:   212 registros (50.0%)
+   Clase 1:   212 registros (50.0%)
+
+============================================================
+=== DIVISIÓN TRAIN/VAL/TEST ===
+============================================================
+
+   Estrategia:  70% train / 15% val / 15% test (estratificado)
+   random_state: 42
+
+   Train:   424 registros (73.9%)
+   Val:      75 registros (13.1%)
+   Test:     75 registros (13.1%)
+
+   Features usadas (14): hours_coding, coffee_intake_mg, distractions, sleep_hours, commits, bugs_reported, ai_usage_hours, cognitive_load, sleep_deficit, productivity_ratio, caffeine_per_hour, work_intensity, coffee_category, sleep_category
+   Target: task_success
+
+============================================================
+=== RESUMEN EJECUTIVO ===
+============================================================
+
+   Registros originales:         500
+   Registros eliminados:         0 (0.0%)
+   Registros limpios:            500
+   Variables originales:         8
+   Variables engineered:         6 nuevas
+   Total features para modelo:   14
+   SMOTE aplicado:               Sí
+   Train size (final):           424
+   Val size:                     75
+   Test size:                    75
+
+   Archivos generados:
+      - notebooks/results/fase3-preparacion/X_train.csv
+      - notebooks/results/fase3-preparacion/X_val.csv
+      - notebooks/results/fase3-preparacion/X_test.csv
+      - notebooks/results/fase3-preparacion/y_train.csv
+      - notebooks/results/fase3-preparacion/y_val.csv
+      - notebooks/results/fase3-preparacion/y_test.csv
+      - notebooks/results/fase3-preparacion/preprocessing_info.json
+      - notebooks/results/fase3-preparacion/fase3_estadisticas.txt
+      - notebooks/results/fase3-preparacion/fase3_distribucion_target.png
+      - notebooks/results/fase3-preparacion/fase3_outliers.png
+      - notebooks/results/fase3-preparacion/fase3_correlation_matrix.png

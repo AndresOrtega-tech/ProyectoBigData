@@ -1,5 +1,7 @@
+import json as json_lib
 import os
 
+import joblib
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -398,8 +400,66 @@ seccion = st.sidebar.selectbox(
         "📈 Análisis Comparativo",
         "🔍 Dataset Explorer",
         "📋 Información del Proyecto",
+        "🤖 Predictor de Éxito",
+        "📊 Modelo Predictivo",
     ],
 )
+
+# ─── Helper: carga del pipeline ML ───────────────────────────────────────────
+
+
+@st.cache_resource
+def cargar_pipeline():
+    """Carga el pipeline sklearn (scaler + RandomForest) desde disco."""
+    try:
+        pipe = joblib.load("dashboard/model/pipeline.pkl")
+        features = joblib.load("dashboard/model/feature_names.pkl")
+        with open("dashboard/model/model_metadata.json") as f:
+            meta = json_lib.load(f)
+        return pipe, features, meta
+    except FileNotFoundError:
+        return None, None, None
+
+
+def calcular_features_derivadas(
+    hours_coding, coffee_intake_mg, sleep_hours, cognitive_load, commits
+):
+    """Calcula las 6 features derivadas con la misma lógica de fase3."""
+    sleep_deficit = 8.0 - sleep_hours
+    productivity_ratio = commits / max(hours_coding, 0.1)
+    caffeine_per_hour = coffee_intake_mg / max(hours_coding, 0.1)
+    work_intensity = hours_coding * cognitive_load
+    coffee_category = (
+        0 if coffee_intake_mg < 200 else (1 if coffee_intake_mg <= 400 else 2)
+    )
+    sleep_category = 0 if sleep_hours < 6 else (1 if sleep_hours <= 8 else 2)
+    return {
+        "sleep_deficit": sleep_deficit,
+        "productivity_ratio": productivity_ratio,
+        "caffeine_per_hour": caffeine_per_hour,
+        "work_intensity": work_intensity,
+        "coffee_category": coffee_category,
+        "sleep_category": sleep_category,
+    }
+
+
+# Etiquetas de features en español — usado en secciones ML
+LABELS = {
+    "hours_coding": "Horas de Código",
+    "coffee_intake_mg": "Cafeína (mg)",
+    "distractions": "Distracciones",
+    "sleep_hours": "Horas de Sueño",
+    "commits": "Commits",
+    "bugs_reported": "Bugs Reportados",
+    "ai_usage_hours": "Uso de IA (h)",
+    "cognitive_load": "Carga Cognitiva",
+    "sleep_deficit": "Déficit de Sueño",
+    "productivity_ratio": "Ratio Productividad",
+    "caffeine_per_hour": "Cafeína por Hora",
+    "work_intensity": "Intensidad de Trabajo",
+    "coffee_category": "Categoría Cafeína",
+    "sleep_category": "Categoría Sueño",
+}
 
 # ─── Resumen General ───────────────────────────────────────────────────────────
 if seccion == "📊 Resumen General":
@@ -940,6 +1000,369 @@ elif seccion == "📋 Información del Proyecto":
     - Evidencia cuantitativa para optimizar productividad
     """
     )
+
+# ─── Modelo Predictivo ────────────────────────────────────────────────────────
+elif seccion == "📊 Modelo Predictivo":
+    st.header("📊 Modelo Predictivo — Random Forest")
+
+    # Cargar metadata
+    try:
+        with open("dashboard/model/model_metadata.json") as f:
+            meta = json_lib.load(f)
+    except FileNotFoundError:
+        st.error(
+            "❌ Metadata del modelo no encontrada. Ejecutá primero `fase45_modelado_evaluacion.py`."
+        )
+        st.stop()
+
+    # Métricas en cards
+    st.subheader("🎯 Métricas en Test Set (datos nunca vistos durante entrenamiento)")
+    col1, col2, col3, col4, col5 = st.columns(5)
+    col1.metric("Accuracy", f"{meta['test_accuracy'] * 100:.1f}%")
+    col2.metric("Precision", f"{meta['test_precision'] * 100:.1f}%")
+    col3.metric("Recall", f"{meta['test_recall'] * 100:.1f}%")
+    col4.metric("F1-Score", f"{meta['test_f1'] * 100:.1f}%")
+    col5.metric("ROC-AUC", f"{meta['test_roc_auc']:.3f}")
+
+    # Advertencia honesta sobre el dataset
+    st.info("""
+    ⚠️ **Nota académica:** El accuracy de 98.7% es muy alto porque el dataset es sintético
+    y sus patrones son muy marcados. En un dataset de producción real los valores serían menores.
+    El modelo sigue siendo válido para demostrar las técnicas de ML aplicadas.
+    """)
+
+    # 4 imágenes en 2×2
+    st.subheader("📈 Visualizaciones del Modelo")
+
+    imagenes_modelo = [
+        ("fase45_model_comparison.png", "Comparación de Modelos (Val Set)"),
+        ("fase45_confusion_matrix.png", "Matriz de Confusión (Test Set)"),
+        ("fase45_roc_curve.png", "Curva ROC (Test Set)"),
+        ("fase45_feature_importance.png", "Importancia de Features"),
+    ]
+
+    col1, col2 = st.columns(2)
+    for i, (img, titulo) in enumerate(imagenes_modelo):
+        with col1 if i % 2 == 0 else col2:
+            ruta = os.path.join("dashboard/assets", img)
+            if os.path.exists(ruta):
+                st.image(Image.open(ruta), caption=titulo, use_container_width=True)
+
+    # Feature importance como tabla interactiva
+    st.subheader("🏆 Ranking de Importancia de Features")
+
+    fi = meta["feature_importance"]
+    fi_sorted = sorted(fi.items(), key=lambda x: -x[1])
+    df_fi = pd.DataFrame(
+        [
+            {
+                "Feature": LABELS.get(k, k),
+                "Importancia": v,
+                "Porcentaje": f"{v * 100:.1f}%",
+            }
+            for k, v in fi_sorted
+        ]
+    )
+    st.dataframe(df_fi, use_container_width=True, hide_index=True)
+
+    st.subheader("📋 Descripción del Proceso")
+    st.markdown("""
+    **Algoritmos evaluados:**
+    - **Logistic Regression** (baseline) — 89.3% accuracy en validación
+    - **Decision Tree** — 100% en validación (estructura interpretable)
+    - **Random Forest** ← modelo seleccionado — 100% en validación, 98.7% en test
+
+    **Optimización:** GridSearchCV con 5-fold cross-validation sobre F1-score
+
+    **Split del dataset:** 70% train / 15% validación / 15% test (estratificado)
+
+    **SMOTE:** Aplicado al training set para balancear las clases (la clase minoritaria era <40%)
+
+    **Features totales:** 14 (8 originales + 6 derivadas por feature engineering)
+    """)
+
+# ─── Predictor de Éxito ───────────────────────────────────────────────────────
+elif seccion == "🤖 Predictor de Éxito":
+    st.header("🤖 Predictor de Éxito en Tareas de Desarrollo")
+
+    pipeline, feature_names, meta = cargar_pipeline()
+
+    if pipeline is None:
+        st.error(
+            "❌ Modelo no encontrado. Ejecutá primero `fase45_modelado_evaluacion.py`."
+        )
+        st.stop()
+
+    # ── Bloque 1: Cómo funciona ──
+    with st.expander("📖 ¿Cómo funciona este predictor?", expanded=True):
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Algoritmo", "Random Forest")
+        col2.metric("Accuracy", f"{meta['test_accuracy'] * 100:.1f}%")
+        col3.metric("Features usadas", "14")
+
+        st.markdown("""
+        Este predictor usa un modelo **Random Forest** entrenado sobre 500 registros de productividad
+        de desarrolladores. Tomás tus valores actuales, el modelo analiza 14 factores y predice si
+        tu sesión de trabajo terminará en éxito o fracaso.
+
+        **¿Qué hace internamente?**
+        1. Recibe tus 8 valores originales (los que ingresás abajo)
+        2. Calcula 6 variables derivadas automáticamente (déficit de sueño, intensidad de trabajo, etc.)
+        3. Normaliza los 14 valores con el mismo scaler del entrenamiento
+        4. El Random Forest vota entre 100 árboles de decisión
+        5. Devuelve la predicción + probabilidad de éxito
+
+        **Factores más importantes** (según el modelo entrenado):
+        """)
+
+        fi = meta["feature_importance"]
+        top3 = sorted(fi.items(), key=lambda x: -x[1])[:3]
+        for k, v in top3:
+            st.progress(v, text=f"**{LABELS.get(k, k)}** — {v * 100:.1f}%")
+
+        st.warning("""
+        ⚠️ **Limitación importante:** Este modelo fue entrenado en un dataset sintético.
+        Las predicciones son una aproximación educativa, no una garantía de rendimiento real.
+        Correlación no implica causalidad.
+        """)
+
+    st.markdown("---")
+
+    # ── Bloque 2: Inputs del usuario ──
+    st.subheader("📝 Ingresá tus valores de hoy")
+    st.markdown(
+        "Mové los sliders según tu situación actual. La predicción se actualiza en tiempo real."
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("**⌨️ Trabajo**")
+        hours_coding = st.slider(
+            "Horas de código hoy",
+            0.0,
+            16.0,
+            6.0,
+            0.5,
+            help="¿Cuántas horas programaste o pensás programar hoy?",
+        )
+        commits = st.slider(
+            "Commits realizados",
+            0,
+            20,
+            5,
+            1,
+            help="Número de commits en la sesión de hoy",
+        )
+        bugs_reported = st.slider(
+            "Bugs encontrados",
+            0,
+            10,
+            1,
+            1,
+            help="Bugs detectados o reportados durante la sesión",
+        )
+        distractions = st.slider(
+            "Número de distracciones",
+            0,
+            15,
+            3,
+            1,
+            help="Interrupciones durante el trabajo (reuniones, mensajes, etc.)",
+        )
+
+    with col2:
+        st.markdown("**🧠 Estado personal**")
+        sleep_hours = st.slider(
+            "Horas de sueño anoche",
+            3.0,
+            12.0,
+            7.0,
+            0.5,
+            help="¿Cuántas horas dormiste la noche anterior?",
+        )
+        coffee_intake_mg = st.slider(
+            "Cafeína consumida (mg)",
+            0,
+            800,
+            300,
+            25,
+            help="1 taza de café ≈ 95mg | 1 espresso ≈ 63mg | 1 Red Bull ≈ 80mg",
+        )
+        cognitive_load = st.slider(
+            "Carga cognitiva percibida (1-10)",
+            1,
+            10,
+            5,
+            1,
+            help="¿Qué tan compleja o exigente te parece la tarea de hoy?",
+        )
+        ai_usage_hours = st.slider(
+            "Horas usando herramientas de IA",
+            0.0,
+            8.0,
+            1.0,
+            0.5,
+            help="GitHub Copilot, ChatGPT, Claude, Cursor, etc.",
+        )
+
+    # ── Bloque 3: Features derivadas (educativo) ──
+    derivadas = calcular_features_derivadas(
+        hours_coding, coffee_intake_mg, sleep_hours, cognitive_load, commits
+    )
+
+    with st.expander("🔬 Variables calculadas automáticamente por el modelo"):
+        st.markdown(
+            "El modelo no usa solo tus valores directos — también calcula estas variables derivadas:"
+        )
+        d1, d2, d3 = st.columns(3)
+        d1.metric(
+            "Déficit de sueño",
+            f"{derivadas['sleep_deficit']:.1f}h",
+            help="8h recomendadas − tus horas de sueño",
+        )
+        d2.metric(
+            "Ratio de productividad",
+            f"{derivadas['productivity_ratio']:.2f}",
+            help="Commits por hora de código",
+        )
+        d3.metric(
+            "Cafeína por hora",
+            f"{derivadas['caffeine_per_hour']:.1f} mg/h",
+            help="Cafeína consumida ÷ horas de código",
+        )
+
+        d4, d5, d6 = st.columns(3)
+        d4.metric(
+            "Intensidad de trabajo",
+            f"{derivadas['work_intensity']:.1f}",
+            help="Horas de código × carga cognitiva",
+        )
+        cat_cafe = ["Bajo (<200mg)", "Medio (200-400mg)", "Alto (>400mg)"][
+            derivadas["coffee_category"]
+        ]
+        cat_sueno = ["Insuficiente (<6h)", "Óptimo (6-8h)", "Excesivo (>8h)"][
+            derivadas["sleep_category"]
+        ]
+        d5.metric("Categoría cafeína", cat_cafe)
+        d6.metric("Categoría sueño", cat_sueno)
+
+    st.markdown("---")
+
+    # ── Bloque 4: Predicción ──
+    st.subheader("🎯 Predicción")
+
+    # Construir vector de 14 features en el orden exacto
+    input_vector = pd.DataFrame(
+        [
+            [
+                hours_coding,
+                coffee_intake_mg,
+                distractions,
+                sleep_hours,
+                commits,
+                bugs_reported,
+                ai_usage_hours,
+                cognitive_load,
+                derivadas["sleep_deficit"],
+                derivadas["productivity_ratio"],
+                derivadas["caffeine_per_hour"],
+                derivadas["work_intensity"],
+                derivadas["coffee_category"],
+                derivadas["sleep_category"],
+            ]
+        ],
+        columns=feature_names,
+    )
+
+    # Predicción
+    pred = pipeline.predict(input_vector)[0]
+    prob = pipeline.predict_proba(input_vector)[0]
+    prob_exito = prob[1]
+    prob_fracaso = prob[0]
+
+    # Resultado visual
+    col_pred, col_prob = st.columns([1, 2])
+
+    with col_pred:
+        if pred == 1:
+            st.success("## ✅ ÉXITO")
+            st.markdown("El modelo predice que **tu sesión será exitosa**.")
+        else:
+            st.error("## ❌ FRACASO")
+            st.markdown("El modelo predice que **tu sesión NO será exitosa**.")
+
+    with col_prob:
+        st.markdown("**Probabilidad de éxito:**")
+        st.progress(float(prob_exito))
+        st.markdown(f"### {prob_exito * 100:.1f}% de probabilidad de éxito")
+        if prob_exito >= 0.8:
+            st.markdown(
+                "🟢 **Alta confianza** — el modelo está muy seguro de su predicción"
+            )
+        elif prob_exito >= 0.5:
+            st.markdown(
+                "🟡 **Confianza moderada** — la sesión podría ir en cualquier dirección"
+            )
+        else:
+            st.markdown("🔴 **Baja confianza en éxito** — múltiples factores en contra")
+
+    # Top 5 factores más influyentes para ESTA predicción
+    st.markdown("---")
+    st.subheader("💡 ¿Qué factores pesaron más en esta predicción?")
+    st.markdown("*Importancia global del modelo × magnitud de tu valor normalizado:*")
+
+    input_vals = input_vector.iloc[0].to_dict()
+    fi = meta["feature_importance"]
+    scores = {k: fi.get(k, 0) * abs(input_vals.get(k, 0)) for k in feature_names}
+    top_factors = sorted(scores.items(), key=lambda x: -x[1])[:5]
+
+    for k, score in top_factors:
+        label = LABELS.get(k, k)
+        val = input_vals.get(k, 0)
+        importancia = fi.get(k, 0)
+        st.markdown(
+            f"**{label}** — valor: `{val:.2f}` | importancia global: `{importancia * 100:.1f}%`"
+        )
+        st.progress(min(float(importancia), 1.0))
+
+    # Recomendaciones personalizadas
+    st.markdown("---")
+    st.subheader("📌 Recomendaciones basadas en tus valores")
+    recomendaciones = []
+
+    if hours_coding < 3:
+        recomendaciones.append(
+            "⚠️ **Horas de código bajas** (<3h): el modelo indica que menos de 3h tiene correlación con fracaso. Considerá extender la sesión."
+        )
+    if coffee_intake_mg < 200:
+        recomendaciones.append(
+            "☕ **Cafeína baja** (<200mg): el análisis previo mostró 0% de éxito en este rango. Considerá aumentar el consumo."
+        )
+    if sleep_hours < 6:
+        recomendaciones.append(
+            "😴 **Déficit de sueño severo** (<6h): el sueño insuficiente eleva la carga cognitiva y reduce el éxito en 40%+."
+        )
+    if cognitive_load >= 8:
+        recomendaciones.append(
+            "🧠 **Carga cognitiva muy alta** (≥8): considerá dividir la tarea en partes más pequeñas."
+        )
+    if bugs_reported >= 4:
+        recomendaciones.append(
+            "🐛 **Bugs críticos** (≥4): el análisis mostró 0% de éxito con 4+ bugs. Detené y refactorizá antes de continuar."
+        )
+    if distractions >= 8:
+        recomendaciones.append(
+            "📵 **Muchas distracciones** (≥8): reducir interrupciones tiene impacto directo en la productividad."
+        )
+
+    if recomendaciones:
+        for r in recomendaciones:
+            st.warning(r)
+    else:
+        st.success(
+            "✅ Tus valores están dentro de los rangos asociados con mayor éxito. ¡Seguí así!"
+        )
 
 # ─── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("---")

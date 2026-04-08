@@ -1,0 +1,33 @@
+{
+  "feature_names": [
+    "hours_coding",
+    "coffee_intake_mg",
+    "distractions",
+    "sleep_hours",
+    "commits",
+    "bugs_reported",
+    "ai_usage_hours",
+    "cognitive_load",
+    "sleep_deficit",
+    "productivity_ratio",
+    "caffeine_per_hour",
+    "work_intensity",
+    "coffee_category",
+    "sleep_category"
+  ],
+  "total_original": 500,
+  "total_after_cleaning": 500,
+  "rows_removed": 0,
+  "smote_applied": true,
+  "train_size": 424,
+  "val_size": 75,
+  "test_size": 75,
+  "class_distribution_train": {
+    "0": 212,
+    "1": 212
+  },
+  "class_distribution_test": {
+    "0": 30,
+    "1": 45
+  }
+}
