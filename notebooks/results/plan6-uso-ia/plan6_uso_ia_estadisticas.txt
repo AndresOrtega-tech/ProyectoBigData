@@ -1,0 +1,146 @@
+=== PLAN 6: ANÁLISIS DE HIPÓTESIS USO DE IA ===
+Hipótesis: 'Mayor uso de herramientas de IA está asociado con mayor task_success'
+Resultado preliminar: ⚠️ DÉBIL
+
+=== METODOLOGÍA ===
+• Dataset: 500 registros de productividad de desarrolladores
+• Variable independiente: ai_usage_hours (horas diarias usando herramientas de IA)
+• Variable dependiente: task_success (0=fracaso, 1=éxito)
+• Análisis: Correlación de Pearson + segmentación por rangos
+• Herramientas: PySpark para procesamiento distribuido, pandas/matplotlib/seaborn para visualización
+• Visualizaciones: boxplot, histograma, barplot de tasa de éxito, scatter
+
+=== DEFINICIÓN DE RANGOS DE USO DE IA ===
+• Rango BAJO:  < 2 horas/día  (uso esporádico o nulo de herramientas IA)
+• Rango MEDIO: 2–4 horas/día  (uso moderado, integrado en el flujo de trabajo)
+• Rango ALTO:  > 4 horas/día  (uso intensivo, IA como parte central del trabajo)
+• Referencia: 2h representa ~25% de una jornada de 8h; 4h representa ~50%
+
+=== ESTADÍSTICAS DESCRIPTIVAS ===
+Correlación de Pearson (ai_usage_hours vs task_success): 0.2417
+Correlación (ai_usage_hours vs commits):                  0.3698
+Correlación (ai_usage_hours vs bugs_reported):            0.1139
+Correlación (ai_usage_hours vs cognitive_load):           0.1199
+Correlación (ai_usage_hours vs hours_coding):             0.5719
+
+Escala de referencia para correlación de Pearson:
+  0.0–0.1  → Correlación nula o insignificante
+  0.1–0.3  → Correlación débil
+  0.3–0.5  → Correlación moderada
+  0.5–0.7  → Correlación fuerte
+  0.7–1.0  → Correlación muy fuerte
+
+Estadísticas de ai_usage_hours por grupo:
+
+  Grupo FRACASO (task_success = 0):
+    • Total registros:     197
+    • Promedio IA:         1.186 h
+    • Mediana IA:          0.950 h
+    • Desviación estándar: 0.937 h
+    • Mínimo:              0.00 h
+    • Máximo:              5.37 h
+    • Percentil 25:        0.54 h
+    • Percentil 75:        1.54 h
+
+  Grupo ÉXITO (task_success = 1):
+    • Total registros:     303
+    • Promedio IA:         1.722 h
+    • Mediana IA:          1.540 h
+    • Desviación estándar: 1.124 h
+    • Mínimo:              0.04 h
+    • Máximo:              6.36 h
+    • Percentil 25:        0.87 h
+    • Percentil 75:        2.36 h
+
+Diferencia clave entre grupos:
+  • Developers con éxito usan 0.536 h más de IA en promedio
+  • Esto representa un 45.2% más de uso de IA vs el grupo de fracaso
+
+=== ANÁLISIS POR RANGOS ===
+Tasa de éxito y características por nivel de uso de IA:
+
+  Rango MEDIO:
+    • Tasa de éxito:            76.0%  (0.7603)
+    • Horas de IA promedio:     2.71 h
+    • Horas de código promedio: 6.17 h
+    • Carga cognitiva promedio: 4.88
+    • Commits promedio:         5.63
+    • Total registros:          121
+    • Proporción del dataset:   24.2%
+    • Interpretación:           Uso moderado equilibrado; IA como complemento al trabajo humano
+
+  Rango ALTO:
+    • Tasa de éxito:            73.3%  (0.7333)
+    • Horas de IA promedio:     4.88 h
+    • Horas de código promedio: 8.54 h
+    • Carga cognitiva promedio: 5.15
+    • Commits promedio:         7.67
+    • Total registros:          15
+    • Proporción del dataset:   3.0%
+    • Interpretación:           Uso intensivo de IA; workflow altamente asistido por herramientas
+
+  Rango BAJO:
+    • Tasa de éxito:            54.9%  (0.5495)
+    • Horas de IA promedio:     0.97 h
+    • Horas de código promedio: 4.48 h
+    • Carga cognitiva promedio: 4.34
+    • Commits promedio:         4.14
+    • Total registros:          364
+    • Proporción del dataset:   72.8%
+    • Interpretación:           Uso esporádico de IA; puede indicar flujo tradicional sin asistencia
+
+=== INSIGHTS CLAVE ===
+1. RELACIÓN DIRECTA IA → ÉXITO:
+   • Correlación positiva débil (0.242): hay asociación pero es limitada
+   • Otros factores probablemente influyen más en el éxito de tareas
+
+2. RANGO ÓPTIMO DE USO DE IA:
+   • El rango 'medio' alcanza la mayor tasa de éxito: 76.0%
+   • Rango bajo  → 54.9% de éxito
+   • Rango alto  → 73.3% de éxito
+   • Diferencia entre extremos: +18.4%
+
+3. CORRELACIONES SECUNDARIAS:
+   • IA vs commits:        0.370  — ¿Genera más commits el uso de IA?
+   • IA vs bugs_reported:  0.114  — ¿Afecta la calidad del código?
+   • IA vs cognitive_load: 0.120  — ¿Reduce la carga mental?
+   • IA vs hours_coding:   0.572  — ¿Complementa o reemplaza el código manual?
+
+4. DISTRIBUCIÓN DEL USO:
+   • Total registros en rango BAJO:  364
+   • Total registros en rango MEDIO: 121
+   • Total registros en rango ALTO:  15
+   • Media global de ai_usage_hours: 1.511 h
+   • Mediana global de ai_usage_hours: 1.260 h
+
+=== VEREDICTO FINAL ===
+⚠️ HIPÓTESIS DÉBIL
+Correlación baja, relación existe pero es débil
+
+Métricas de decisión:
+  • Correlación observada:   0.2417
+  • Umbral CONFIRMADA:        > 0.50
+  • Umbral CONFIRMADA PARCIALMENTE: 0.30–0.50
+  • Umbral DÉBIL:             0.10–0.30
+  • Umbral REFUTADA:          < 0.10 o negativo
+  • Diferencia en medias:     +0.536 h (éxito vs fracaso)
+  • Rango con mayor éxito:    'medio' (76.0%)
+
+=== RECOMENDACIONES PRÁCTICAS ===
+• Mantener uso moderado de IA (2–4h/día) como punto de equilibrio óptimo
+• Evitar tanto el sub-uso (< 2h) como el sobre-uso (> 4h) de herramientas de IA
+• Complementar la IA con pensamiento crítico propio para no perder comprensión profunda
+
+• Medir el impacto de las herramientas IA antes y después de su adopción
+• Combinar métricas cuantitativas (horas) con cualitativas (tipo de uso)
+• Considerar talleres sobre uso efectivo de IA para developers con rango 'bajo'
+
+=== LIMITACIONES DEL ANÁLISIS ===
+• Las horas de uso de IA son auto-reportadas; pueden no reflejar la realidad exacta
+• Correlación no implica causalidad: el éxito puede deberse a otros factores
+• Dataset limitado a 500 registros; puede no representar toda la población de developers
+• No se controla por tipo de herramienta IA (autocomplete, chat, generación de código)
+• No se mide la calidad del uso de IA, solo la cantidad de horas
+• Factores como experiencia del developer, tipo de proyecto o presión de sprint no están incluidos
+• La definición de 'task_success' puede variar según el contexto del proyecto
+• Posible sesgo de selección: developers más productivos pueden reportar más uso de IA

@@ -1,0 +1,159 @@
+=================================================================
+=== PLAN 7: TRADE-OFF COMMITS VS BUGS REPORTADOS ===
+=================================================================
+Hipótesis: "A mayor cantidad de commits, mayor probabilidad de
+más bugs reportados, y ambos factores combinados afectan
+negativamente a task_success."
+
+=================================================================
+=== METODOLOGÍA ===
+=================================================================
+• Dataset: 500 registros de productividad de desarrolladores
+• Variable cuantitativa 1: commits (cantidad de commits por sesión de trabajo)
+• Variable cuantitativa 2: bugs_reported (cantidad de bugs detectados en la sesión)
+• Variable dependiente: task_success (binaria: 0=fracaso, 1=éxito)
+• Técnicas utilizadas:
+    – Correlación de Pearson (PySpark stat.corr) para cuantificar relaciones
+    – Segmentación en rangos discretos mediante lógica condicional (when/otherwise)
+    – Agregación groupBy + avg para tasas de éxito por segmento
+    – Análisis matricial combinado (commits_rango × bugs_rango) vía heatmap
+• Herramientas: PySpark 3.5, Pandas 3.0, Matplotlib 3.10, Seaborn 0.13
+
+=================================================================
+=== DEFINICIÓN DE RANGOS ===
+=================================================================
+COMMITS (dimensión productividad / cantidad):
+  • bajo   : commits < 3     → poca actividad, sesión exploratoria o bloqueada
+  • medio  : commits 3–6     → ritmo normal, flujo sostenido de trabajo
+  • alto   : commits > 6     → alta actividad, posible presión o deuda técnica
+
+BUGS REPORTADOS (dimensión calidad):
+  • sin_bugs : bugs = 0      → código limpio, sin problemas detectados
+  • pocos    : bugs = 1–2    → errores menores, manejables, fáciles de corregir
+  • critico  : bugs ≥ 3      → múltiples problemas, riesgo para la entrega
+
+Justificación de umbrales:
+  • Mediana commits: 5  → umbral medio centrado en distribución real
+  • Mediana bugs   : 0  → umbral pocos/critico en zona de impacto
+
+=================================================================
+=== ESTADÍSTICAS DESCRIPTIVAS ===
+=================================================================
+COMMITS:
+  • Promedio      : 4.61
+  • Mediana       : 5.0
+  • Desv. Estándar: 2.70
+  • Mínimo / Máximo: 0 / 13
+  • Q1 / Q3       : 3 / 6
+  Por grupo de éxito:
+    – Éxito   (n=303): prom=5.35, med=5.0, std=2.45
+    – Fracaso (n=197): prom=3.47, med=3.0, std=2.69
+
+BUGS REPORTADOS:
+  • Promedio      : 0.86
+  • Mediana       : 0.0
+  • Desv. Estándar: 1.10
+  • Mínimo / Máximo: 0 / 5
+  • Q1 / Q3       : 0 / 2
+  Por grupo de éxito:
+    – Éxito   (n=303): prom=0.70, med=0.0, std=0.94
+    – Fracaso (n=197): prom=1.10, med=1.0, std=1.28
+
+CORRELACIONES (Pearson):
+  commits       vs task_success : +0.339  ← positiva moderada
+  bugs_reported vs task_success : -0.178  ← negativa débil
+  commits       vs bugs_reported: +0.026  ← positiva nula
+
+=================================================================
+=== ANÁLISIS POR CATEGORÍAS ===
+=================================================================
+TASA DE ÉXITO POR RANGO DE COMMITS:
+  BAJO  : 33.3% éxito | n=117 (23.4% del dataset) | avg bugs reportados = 0.85
+  MEDIO : 63.9% éxito | n=266 (53.2% del dataset) | avg bugs reportados = 0.86
+  ALTO  : 80.3% éxito | n=117 (23.4% del dataset) | avg bugs reportados = 0.87
+
+TASA DE ÉXITO POR RANGO DE BUGS:
+  SIN_BUGS  : 66.7% éxito | n=261 (52.2% del dataset) | avg commits = 4.6
+  POCOS     : 57.3% éxito | n=192 (38.4% del dataset) | avg commits = 4.6
+  CRITICO   : 40.4% éxito | n=47 (9.4% del dataset) | avg commits = 4.6
+
+HEATMAP COMBINADO — commits_rango × bugs_rango → tasa de éxito:
+                 |         BAJO |        MEDIO |         ALTO
+  -----------------------------------------------------------
+  SIN_BUGS       |        39.3% |        65.2% |        95.4%
+  POCOS          |        27.3% |        63.6% |        73.2%
+  CRITICO        |        25.0% |        58.3% |        18.2%
+
+DETALLE COMPLETO DE TODAS LAS COMBINACIONES:
+  commits=bajo   + bugs=sin_bugs   → 39.3% éxito  (n=61)
+  commits=bajo   + bugs=pocos      → 27.3% éxito  (n=44)
+  commits=bajo   + bugs=critico    → 25.0% éxito  (n=12)
+  commits=medio  + bugs=sin_bugs   → 65.2% éxito  (n=135)
+  commits=medio  + bugs=pocos      → 63.6% éxito  (n=107)
+  commits=medio  + bugs=critico    → 58.3% éxito  (n=24)
+  commits=alto   + bugs=sin_bugs   → 95.4% éxito  (n=65)
+  commits=alto   + bugs=pocos      → 73.2% éxito  (n=41)
+  commits=alto   + bugs=critico    → 18.2% éxito  (n=11)
+
+=================================================================
+=== INSIGHTS CLAVE ===
+=================================================================
+1. RELACIÓN COMMITS → BUGS:
+   AUSENTE — sin correlación significativa (+0.026): commits y bugs operan como variables independientes
+   Diferencia en commits éxito vs fracaso: 5.35 vs 3.47
+
+2. IMPACTO DIFERENCIAL EN TASK_SUCCESS:
+   Mayor impacto : commits (r=+0.339)
+   Menor impacto : bugs_reported (r=-0.178)
+   Tasa global de éxito del dataset: 60.6%
+
+3. COMBINACIÓN ÓPTIMA (mayor tasa de éxito):
+   commits=alto + bugs=sin_bugs
+   → Tasa de éxito: 95.4%  (n=65)
+
+4. COMBINACIÓN PEOR (menor tasa de éxito):
+   commits=alto + bugs=critico
+   → Tasa de éxito: 18.2%  (n=11)
+
+5. AMPLITUD DEL TRADE-OFF:
+   Diferencia entre combinación óptima y peor: 77.2%
+   Interpretación: Alto impacto de la combinación commits/bugs sobre el éxito
+
+=================================================================
+=== VEREDICTO FINAL ===
+=================================================================
+⚠️  RESULTADO MIXTO — TRADE-OFF PARCIAL
+La evidencia muestra patrones contradictorios o muy débiles:
+  • commits vs bugs   : r=+0.026
+  • commits vs éxito  : r=+0.339
+  • bugs vs éxito     : r=-0.178
+El análisis combinado del heatmap aporta más matices
+que las correlaciones simples por separado.
+
+Fuerza general del trade-off observado: DÉBIL
+
+=================================================================
+=== RECOMENDACIONES PRÁCTICAS ===
+=================================================================
+• Apuntar al rango de commits 'alto' asociado con la mayor tasa de éxito
+• Evitar la combinación crítica: commits=alto + bugs=critico (tasa mínima: 18.2%)
+• No sacrificar calidad (más bugs) para aumentar la cantidad de commits
+• Si bugs_reported ≥ 3 (zona crítica), priorizar refactorización antes de commitear
+• Implementar code review incremental para detectar bugs antes de acumularlos
+• Usar el heatmap como mapa de riesgo: celdas rojas son señales de alerta operativa
+• Combinación recomendada: commits=alto + bugs=sin_bugs → 95.4% de éxito esperado
+
+=================================================================
+=== LIMITACIONES DEL ANÁLISIS ===
+=================================================================
+• Correlación no implica causalidad: factores externos no medidos pueden influir
+• Dataset limitado: 500 registros pueden no generalizar a todos los contextos
+• No se controla por la complejidad inherente de cada tarea
+• El conteo de bugs depende de la cobertura del proceso de QA/testing
+• La granularidad de commits varía por estilo (commits atómicos vs commits grandes)
+• task_success es binaria y puede ocultar matices de rendimiento parcial
+• Variables omitidas: pair programming, code review, experiencia del desarrollador
+• Los umbrales de rango (3/6 commits, 2 bugs) son heurísticos — cambiarlos
+  podría modificar las conclusiones del análisis combinado
+• El análisis de correlación de Pearson asume relación lineal;
+  relaciones no lineales (U-shape, threshold effects) podrían no captarse
